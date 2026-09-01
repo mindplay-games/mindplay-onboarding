@@ -12,46 +12,75 @@
 
 <body>
 
-  <main class="login-container">
+  <main class="app-container">
 
-    <div class="logo">
-      MindPlay
-    </div>
+    <section id="login-section" class="login-container">
 
-    <h1>ברוכים הבאים</h1>
+      <div class="logo">
+        MindPlay
+      </div>
 
-    <p class="subtitle">
-      מערכת האונבורדינג למדריכים חדשים
-    </p>
+      <h1>ברוכים הבאים</h1>
 
-    <button id="google-login-btn">
-      התחברות עם Google
-    </button>
-
-    <div id="logged-in-area" class="hidden">
-
-      <img
-        id="user-photo"
-        class="user-photo"
-        alt="תמונת משתמש"
-      >
-
-      <h2 id="user-name"></h2>
-
-      <p id="user-email"></p>
-
-      <p>
-        תפקיד:
-        <strong id="user-role"></strong>
+      <p class="subtitle">
+        מערכת האונבורדינג למדריכים חדשים
       </p>
 
-      <button id="logout-btn" class="secondary-button">
-        התנתקות
+      <button id="google-login-btn">
+        התחברות עם Google
       </button>
 
-    </div>
+      <p id="user-message"></p>
 
-    <p id="user-message"></p>
+    </section>
+
+
+    <section id="dashboard-section" class="dashboard hidden">
+
+      <header class="dashboard-header">
+
+        <div>
+          <h1>האונבורדינג שלי</h1>
+          <p id="welcome-message"></p>
+        </div>
+
+        <div class="user-box">
+
+          <img
+            id="user-photo"
+            class="user-photo"
+            alt="תמונת משתמש"
+          >
+
+          <div>
+            <strong id="user-name"></strong>
+            <p id="user-email"></p>
+            <p>
+              תפקיד:
+              <span id="user-role"></span>
+            </p>
+          </div>
+
+          <button id="logout-btn" class="secondary-button">
+            התנתקות
+          </button>
+
+        </div>
+
+      </header>
+
+
+      <section class="topics-section">
+
+        <h2>מסלול ההכשרה</h2>
+
+        <div id="topics-container">
+          <p>טוען נושאים...</p>
+        </div>
+
+      </section>
+
+    </section>
 
   </main>
 
