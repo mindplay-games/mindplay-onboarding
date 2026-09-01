@@ -31,11 +31,17 @@ import {
 
 const firebaseConfig = {
   apiKey: "AIzaSyCXPQR1s8Q2oz8YJClxFq7PDosx4RQYosE",
+
   authDomain: "mindplay-onboarding.firebaseapp.com",
+
   projectId: "mindplay-onboarding",
+
   storageBucket: "mindplay-onboarding.firebasestorage.app",
+
   messagingSenderId: "247923560281",
+
   appId: "1:247923560281:web:aa4f198aef93f15011c648",
+
   measurementId: "G-WK3N8F03D3"
 };
 
@@ -90,56 +96,89 @@ const welcomeMessage =
 const topicsContainer =
   document.getElementById("topics-container");
 
+const managerSection =
+  document.getElementById("manager-section");
+
+const openAdminButton =
+  document.getElementById("open-admin-btn");
+
 
 // ---------------------------
-// Login
+// Google Login
 // ---------------------------
 
-loginButton.addEventListener("click", async () => {
+loginButton.addEventListener(
+  "click",
+  async () => {
 
-  try {
+    try {
 
-    userMessage.textContent =
-      "מתחבר...";
+      userMessage.textContent =
+        "מתחבר...";
 
-    await signInWithPopup(
-      auth,
-      googleProvider
-    );
+      await signInWithPopup(
+        auth,
+        googleProvider
+      );
+
+    }
+
+    catch (error) {
+
+      console.error(
+        "Login error:",
+        error
+      );
+
+      userMessage.textContent =
+        "אירעה שגיאה בהתחברות.";
+
+    }
 
   }
-
-  catch (error) {
-
-    console.error(error);
-
-    userMessage.textContent =
-      "אירעה שגיאה בהתחברות.";
-
-  }
-
-});
+);
 
 
 // ---------------------------
 // Logout
 // ---------------------------
 
-logoutButton.addEventListener("click", async () => {
+logoutButton.addEventListener(
+  "click",
+  async () => {
 
-  try {
+    try {
 
-    await signOut(auth);
+      await signOut(auth);
+
+    }
+
+    catch (error) {
+
+      console.error(
+        "Logout error:",
+        error
+      );
+
+    }
 
   }
+);
 
-  catch (error) {
 
-    console.error(error);
+// ---------------------------
+// Admin Button
+// ---------------------------
+
+openAdminButton.addEventListener(
+  "click",
+  () => {
+
+    window.location.href =
+      "admin.html";
 
   }
-
-});
+);
 
 
 // ---------------------------
@@ -149,10 +188,15 @@ logoutButton.addEventListener("click", async () => {
 async function getOrCreateUser(user) {
 
   const userRef =
-    doc(db, "users", user.uid);
+    doc(
+      db,
+      "users",
+      user.uid
+    );
 
   const userSnapshot =
     await getDoc(userRef);
+
 
   if (userSnapshot.exists()) {
 
@@ -160,26 +204,35 @@ async function getOrCreateUser(user) {
 
   }
 
+
   const newUser = {
 
-    name: user.displayName || "",
+    name:
+      user.displayName || "",
 
-    email: user.email || "",
+    email:
+      user.email || "",
 
-    photoURL: user.photoURL || "",
+    photoURL:
+      user.photoURL || "",
 
-    role: "instructor",
+    role:
+      "instructor",
 
-    active: true,
+    active:
+      true,
 
-    createdAt: serverTimestamp()
+    createdAt:
+      serverTimestamp()
 
   };
+
 
   await setDoc(
     userRef,
     newUser
   );
+
 
   return newUser;
 
@@ -195,19 +248,39 @@ async function loadTopics() {
   topicsContainer.innerHTML =
     "<p>טוען נושאים...</p>";
 
+
   try {
 
     const topicsQuery =
       query(
-        collection(db, "topics"),
-        where("active", "==", true),
-        orderBy("order")
+
+        collection(
+          db,
+          "topics"
+        ),
+
+        where(
+          "active",
+          "==",
+          true
+        ),
+
+        orderBy(
+          "order"
+        )
+
       );
 
-    const snapshot =
-      await getDocs(topicsQuery);
 
-    topicsContainer.innerHTML = "";
+    const snapshot =
+      await getDocs(
+        topicsQuery
+      );
+
+
+    topicsContainer.innerHTML =
+      "";
+
 
     if (snapshot.empty) {
 
@@ -218,43 +291,60 @@ async function loadTopics() {
 
     }
 
-    snapshot.forEach((documentSnapshot) => {
 
-      const topic =
-        documentSnapshot.data();
+    snapshot.forEach(
+      (documentSnapshot) => {
 
-      const card =
-        document.createElement("article");
+        const topic =
+          documentSnapshot.data();
 
-      card.classList.add("topic-card");
 
-      card.innerHTML = `
-        <div class="topic-number">
-          נושא ${topic.order}
-        </div>
+        const card =
+          document.createElement(
+            "article"
+          );
 
-        <h3>
-          ${topic.title}
-        </h3>
 
-        <p class="topic-description">
-          ${topic.description || ""}
-        </p>
+        card.classList.add(
+          "topic-card"
+        );
 
-        ${
-          topic.requiresZoomAfter
-            ? `
-              <div class="zoom-notice">
-                ${topic.zoomMessage || ""}
-              </div>
-            `
-            : ""
-        }
-      `;
 
-      topicsContainer.appendChild(card);
+        card.innerHTML = `
 
-    });
+          <div class="topic-number">
+            נושא ${topic.order}
+          </div>
+
+          <h3>
+            ${topic.title}
+          </h3>
+
+          <p class="topic-description">
+            ${topic.description || ""}
+          </p>
+
+          ${
+            topic.requiresZoomAfter
+
+              ? `
+                <div class="zoom-notice">
+                  ${topic.zoomMessage || ""}
+                </div>
+              `
+
+              : ""
+          }
+
+        `;
+
+
+        topicsContainer.appendChild(
+          card
+        );
+
+      }
+    );
 
   }
 
@@ -264,6 +354,7 @@ async function loadTopics() {
       "Error loading topics:",
       error
     );
+
 
     topicsContainer.innerHTML =
       "<p>אירעה שגיאה בטעינת נושאי ההכשרה.</p>";
@@ -286,12 +377,15 @@ onAuthStateChanged(
       try {
 
         const userData =
-          await getOrCreateUser(user);
+          await getOrCreateUser(
+            user
+          );
 
 
         loginSection.classList.add(
           "hidden"
         );
+
 
         dashboardSection.classList.remove(
           "hidden"
@@ -299,10 +393,14 @@ onAuthStateChanged(
 
 
         userName.textContent =
-          user.displayName || "משתמש";
+          user.displayName ||
+          "משתמש";
+
 
         userEmail.textContent =
-          user.email || "";
+          user.email ||
+          "";
+
 
         welcomeMessage.textContent =
           `שלום ${user.displayName || ""}, כאן אפשר לעקוב אחר מסלול ההכשרה שלך.`;
@@ -312,6 +410,7 @@ onAuthStateChanged(
 
           userPhoto.src =
             user.photoURL;
+
 
           userPhoto.style.display =
             "block";
@@ -334,12 +433,22 @@ onAuthStateChanged(
           userRole.textContent =
             "אחראית הדרכה";
 
+
+          managerSection.classList.remove(
+            "hidden"
+          );
+
         }
 
         else {
 
           userRole.textContent =
             "מדריך/ה";
+
+
+          managerSection.classList.add(
+            "hidden"
+          );
 
         }
 
@@ -350,7 +459,11 @@ onAuthStateChanged(
 
       catch (error) {
 
-        console.error(error);
+        console.error(
+          "Error loading user:",
+          error
+        );
+
 
         userMessage.textContent =
           "הייתה בעיה בטעינת המשתמש.";
@@ -365,9 +478,19 @@ onAuthStateChanged(
         "hidden"
       );
 
+
       dashboardSection.classList.add(
         "hidden"
       );
+
+
+      managerSection.classList.add(
+        "hidden"
+      );
+
+
+      userMessage.textContent =
+        "";
 
     }
 
