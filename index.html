@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="he" dir="rtl">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -12,9 +13,14 @@
 <body>
 
   <main class="login-container">
-    <h1>ברוכים הבאים ל־MindPlay</h1>
 
-    <p>
+    <div class="logo">
+      MindPlay
+    </div>
+
+    <h1>ברוכים הבאים</h1>
+
+    <p class="subtitle">
       מערכת האונבורדינג למדריכים חדשים
     </p>
 
@@ -22,10 +28,35 @@
       התחברות עם Google
     </button>
 
+    <div id="logged-in-area" class="hidden">
+
+      <img
+        id="user-photo"
+        class="user-photo"
+        alt="תמונת משתמש"
+      >
+
+      <h2 id="user-name"></h2>
+
+      <p id="user-email"></p>
+
+      <p>
+        תפקיד:
+        <strong id="user-role"></strong>
+      </p>
+
+      <button id="logout-btn" class="secondary-button">
+        התנתקות
+      </button>
+
+    </div>
+
     <p id="user-message"></p>
+
   </main>
 
   <script type="module" src="app.js"></script>
 
 </body>
+
 </html>
