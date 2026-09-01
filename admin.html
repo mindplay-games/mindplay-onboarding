@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>ניהול מערכת - MindPlay Onboarding</title>
+
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+  <main class="dashboard">
+
+    <header class="dashboard-header">
+
+      <div>
+        <h1>ניהול מערכת</h1>
+        <p>ניהול תכני האונבורדינג והמדריכים</p>
+      </div>
+
+      <div>
+        <button id="back-btn" class="secondary-button">
+          חזרה למסלול
+        </button>
+
+        <button id="logout-btn" class="secondary-button">
+          התנתקות
+        </button>
+      </div>
+
+    </header>
+
+
+    <section id="loading-section">
+      <p>בודק הרשאות...</p>
+    </section>
+
+
+    <section id="access-denied-section" class="hidden">
+
+      <div class="topic-card">
+        <h2>אין הרשאה</h2>
+
+        <p>
+          המסך הזה זמין רק לאחראיות הדרכה.
+        </p>
+
+        <button id="denied-back-btn">
+          חזרה למסלול
+        </button>
+      </div>
+
+    </section>
+
+
+    <section id="admin-section" class="hidden">
+
+      <div class="manager-banner">
+
+        <div>
+          <h2>ניהול תוכן</h2>
+
+          <p>
+            כאן ניתן להוסיף ולנהל את נושאי ההכשרה.
+          </p>
+        </div>
+
+      </div>
+
+
+      <section class="admin-grid">
+
+        <div class="topic-card">
+
+          <h2>הוספת נושא חדש</h2>
+
+          <form id="topic-form">
+
+            <div class="form-group">
+              <label for="topic-title">
+                כותרת
+              </label>
+
+              <input
+                id="topic-title"
+                type="text"
+                required
+              >
+            </div>
+
+
+            <div class="form-group">
+              <label for="topic-description">
+                תיאור
+              </label>
+
+              <textarea
+                id="topic-description"
+                rows="4"
+              ></textarea>
+            </div>
+
+
+            <div class="form-group">
+              <label for="topic-order">
+                סדר
+              </label>
+
+              <input
+                id="topic-order"
+                type="number"
+                min="1"
+                required
+              >
+            </div>
+
+
+            <div class="form-group checkbox-group">
+
+              <label>
+                <input
+                  id="topic-active"
+                  type="checkbox"
+                  checked
+                >
+
+                נושא פעיל
+              </label>
+
+            </div>
+
+
+            <div class="form-group checkbox-group">
+
+              <label>
+                <input
+                  id="topic-zoom"
+                  type="checkbox"
+                >
+
+                יש לקבוע Zoom לאחר הנושא
+              </label>
+
+            </div>
+
+
+            <div
+              id="zoom-message-group"
+              class="form-group hidden"
+            >
+
+              <label for="topic-zoom-message">
+                הודעה לאחר סיום הנושא
+              </label>
+
+              <textarea
+                id="topic-zoom-message"
+                rows="4"
+              ></textarea>
+
+            </div>
+
+
+            <button type="submit">
+              הוספת נושא
+            </button>
+
+            <p id="form-message"></p>
+
+          </form>
+
+        </div>
+
+
+        <div class="topic-card">
+
+          <h2>נושאים קיימים</h2>
+
+          <div id="admin-topics-container">
+            <p>טוען...</p>
+          </div>
+
+        </div>
+
+      </section>
+
+    </section>
+
+  </main>
+
+
+  <script type="module" src="admin.js"></script>
+
+</body>
+
+</html>
