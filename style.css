@@ -1,0 +1,104 @@
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: #f5f7fb;
+  color: #222;
+
+  min-height: 100vh;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.login-container {
+  width: 90%;
+  max-width: 450px;
+
+  background: white;
+
+  padding: 40px;
+
+  border-radius: 18px;
+
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
+
+  text-align: center;
+}
+
+.logo {
+  font-size: 30px;
+  font-weight: bold;
+
+  margin-bottom: 25px;
+}
+
+h1 {
+  margin-bottom: 10px;
+}
+
+.subtitle {
+  color: #666;
+
+  margin-bottom: 30px;
+}
+
+button {
+  border: none;
+
+  padding: 14px 24px;
+
+  border-radius: 10px;
+
+  font-size: 16px;
+
+  cursor: pointer;
+
+  background: #4285f4;
+  color: white;
+
+  transition: 0.2s;
+}
+
+button:hover {
+  opacity: 0.9;
+  transform: translateY(-1px);
+}
+
+.secondary-button {
+  margin-top: 15px;
+
+  background: #eeeeee;
+  color: #333;
+}
+
+.hidden {
+  display: none;
+}
+
+#logged-in-area {
+  margin-top: 25px;
+}
+
+.user-photo {
+  width: 80px;
+  height: 80px;
+
+  border-radius: 50%;
+
+  object-fit: cover;
+
+  margin-bottom: 10px;
+}
+
+#user-message {
+  margin-top: 20px;
+
+  color: #666;
+
+  font-size: 14px;
+}
