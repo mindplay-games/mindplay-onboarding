@@ -6,14 +6,17 @@
 
 ## מצב נוכחי
 
-הגרסה הקיימת היא בסיס ל־Phase 1 ותחילת ממשק הניהול:
+הגרסה הקיימת כוללת את Phase 1, את Dashboard המדריך של Phase 2 ותחילת ממשק הניהול:
 
 - התחברות Google ויצירת מסמך משתמש חדש בתפקיד `instructor`.
 - הבחנה בין `instructor` לבין `trainingManager` לפי `users/{uid}.role`.
-- הצגת נושאים פעילים מ־`topics` לפי הסדר.
+- Dashboard קבוע של שש יחידות ההכשרה, ללא תלות ב־`topics` הישן.
+- שמירת progress ב־`progress/{uid}`, חישוב אחוזים ומצבי `locked`, `available`,
+  `inProgress` ו־`completed`, כולל נקודות Zoom מידעיות.
+- Dashboard רספונסיבי עם מצבי loading, empty ו־error.
 - מסך ניהול מוגן ברמת הממשק, שמאפשר ליצור נושא ולסמן אם נדרש Zoom אחריו.
 
-עדיין אין מסך למידה של יחידה/step, שמירת התקדמות, נעילת יחידות, שאלות או
+עדיין אין מסך למידה של יחידה/step, עדכון progress מתוך למידה, שאלות או
 סימולציות. כללי Firestore עבור המודל הקיים והמודל המתוכנן נמצאים בריפו, אך הם
 מגינים על סביבת Firebase רק לאחר פריסה מפורשת.
 
@@ -49,6 +52,8 @@ python3 -m http.server 8000
    `users/{uid}.role` מ־`instructor` ל־`trainingManager` עבור אחראיות הדרכה.
 6. מבצעים את רשימת הבדיקות הידניות שב־`docs/PHASE_1_VERIFICATION.md` לפני
    שמתחילים את Phase 2.
+
+בדיקות הקבלה ל־Dashboard של Phase 2 מתועדות ב־`docs/PHASE_2_VERIFICATION.md`.
 
 אין לשנות role מתוך קוד הדפדפן ואין לפרסם Rules ישירות ב־Console בלי לעדכן גם
 את `firestore.rules` בריפו.

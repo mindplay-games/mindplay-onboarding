@@ -11,15 +11,17 @@ import {
   getDoc,
   setDoc,
   serverTimestamp,
-  collection,
-  getDocs,
-  query,
-  where,
-  orderBy
+  runTransaction
 } from
   "https://www.gstatic.com/firebasejs/12.8.0/firebase-firestore.js";
 
 import { auth, db } from "./firebase.js";
+import {
+  EMPTY_PROGRESS,
+  ONBOARDING_UNITS,
+  normalizeProgress,
+  summarizeProgress
+} from "./progress-model.mjs";
 
 const googleProvider = new GoogleAuthProvider();
 
@@ -67,7 +69,29 @@ const managerSection =
 const openAdminButton =
   document.getElementById("open-admin-btn");
 
+const continueButton =
+  document.getElementById("continue-btn");
+
+const continueMessage =
+  document.getElementById("continue-message");
+
+const overallProgressValue =
+  document.getElementById("overall-progress-value");
+
+const overallProgressBar =
+  document.getElementById("overall-progress-bar");
+
+const progressTrack =
+  document.querySelector(".progress-track");
+
+const progressDetails =
+  document.getElementById("progress-details");
+
+const currentUnitLabel =
+  document.getElementById("current-unit-label");
+
 let signedOutMessage = "";
+let resumeTarget = null;
 
 
 // ---------------------------
@@ -151,6 +175,15 @@ openAdminButton.addEventListener(
   }
 );
 
+continueButton.addEventListener("click", () => {
+  if (!resumeTarget) {
+    return;
+  }
+
+  continueMessage.textContent =
+    `היחידה הבאה שלך היא „${resumeTarget.title}”. אפשר יהיה לפתוח אותה במסך הלמידה ב־Phase 3.`;
+});
+
 
 // ---------------------------
 // Create / Get User
@@ -211,129 +244,155 @@ async function getOrCreateUser(user) {
 
 
 // ---------------------------
-// Load Topics
+// Persistent Progress
 // ---------------------------
 
-async function loadTopics() {
+async function getOrCreateProgress(uid) {
+  const progressRef = doc(db, "progress", uid);
 
-  topicsContainer.innerHTML =
-    "<p>טוען נושאים...</p>";
+  return runTransaction(db, async (transaction) => {
+    const progressSnapshot = await transaction.get(progressRef);
 
-
-  try {
-
-    const topicsQuery =
-      query(
-
-        collection(
-          db,
-          "topics"
-        ),
-
-        where(
-          "active",
-          "==",
-          true
-        ),
-
-        orderBy(
-          "order"
-        )
-
-      );
-
-
-    const snapshot =
-      await getDocs(
-        topicsQuery
-      );
-
-
-    topicsContainer.innerHTML =
-      "";
-
-
-    if (snapshot.empty) {
-
-      topicsContainer.innerHTML =
-        "<p>עדיין אין נושאים במסלול ההכשרה.</p>";
-
-      return;
-
+    if (progressSnapshot.exists()) {
+      return normalizeProgress(progressSnapshot.data());
     }
 
+    const initialProgress = {
+      ...EMPTY_PROGRESS,
+      startedUnits: [],
+      completedUnits: [],
+      updatedAt: serverTimestamp()
+    };
 
-    snapshot.forEach(
-      (documentSnapshot) => {
-
-        const topic =
-          documentSnapshot.data();
-
-
-        const card =
-          document.createElement(
-            "article"
-          );
-
-
-        card.classList.add(
-          "topic-card"
-        );
-
-
-        card.innerHTML = `
-
-          <div class="topic-number">
-            נושא ${topic.order}
-          </div>
-
-          <h3>
-            ${topic.title}
-          </h3>
-
-          <p class="topic-description">
-            ${topic.description || ""}
-          </p>
-
-          ${
-            topic.requiresZoomAfter
-
-              ? `
-                <div class="zoom-notice">
-                  ${topic.zoomMessage || ""}
-                </div>
-              `
-
-              : ""
-          }
-
-        `;
-
-
-        topicsContainer.appendChild(
-          card
-        );
-
-      }
-    );
-
-  }
-
-  catch (error) {
-
-    console.error(
-      "Error loading topics:",
-      error
-    );
-
-
-    topicsContainer.innerHTML =
-      "<p>אירעה שגיאה בטעינת נושאי ההכשרה.</p>";
-
-  }
-
+    transaction.set(progressRef, initialProgress);
+    return normalizeProgress(initialProgress);
+  });
 }
 
+
+// ---------------------------
+// Render Instructor Journey
+// ---------------------------
+
+function renderDashboard(progress) {
+  topicsContainer.replaceChildren();
+  topicsContainer.setAttribute("aria-busy", "false");
+
+  if (!ONBOARDING_UNITS.length) {
+    topicsContainer.appendChild(
+      createStatusMessage("מסלול ההכשרה עדיין בהכנה.", "empty")
+    );
+    return;
+  }
+
+  const summary = summarizeProgress(progress);
+  resumeTarget = summary.targetUnit;
+
+  overallProgressValue.textContent = `${summary.percentage}%`;
+  overallProgressBar.style.width = `${summary.percentage}%`;
+  progressTrack.setAttribute("aria-valuenow", String(summary.percentage));
+  progressDetails.textContent = `${summary.completedCount} מתוך ${ONBOARDING_UNITS.length} יחידות הושלמו`;
+
+  if (summary.isComplete) {
+    currentUnitLabel.textContent = "כל הכבוד — השלמת את מסלול ההכשרה!";
+    continueButton.textContent = "המסלול הושלם";
+    continueButton.disabled = true;
+  } else {
+    const targetAction = resumeTarget.status === "inProgress" ? "ממשיכים" : "היחידה הבאה";
+    currentUnitLabel.textContent = `${targetAction}: ${resumeTarget.title}`;
+    continueButton.textContent = resumeTarget.status === "inProgress"
+      ? "המשך מאיפה שעצרתי"
+      : "מעבר ליחידה הבאה";
+    continueButton.disabled = false;
+  }
+
+  summary.unitStates.forEach((unit) => {
+    topicsContainer.appendChild(createUnitCard(unit));
+
+    if (unit.checkpoint) {
+      topicsContainer.appendChild(createCheckpoint(unit.checkpoint));
+    }
+  });
+}
+
+function createUnitCard(unit) {
+  const statusLabels = {
+    locked: "נעולה",
+    available: "זמינה",
+    inProgress: "בתהליך",
+    completed: "הושלמה"
+  };
+  const actionLabels = {
+    locked: "ייפתח לאחר השלמת היחידה הקודמת",
+    available: "מוכנה להתחלה ב־Phase 3",
+    inProgress: "אפשר יהיה להמשיך ב־Phase 3",
+    completed: "היחידה הושלמה"
+  };
+
+  const card = document.createElement("article");
+  card.classList.add("topic-card", `is-${unit.status}`);
+  card.dataset.unitId = unit.id;
+
+  const cardHeader = document.createElement("div");
+  cardHeader.className = "topic-card-header";
+
+  const number = document.createElement("span");
+  number.className = "topic-number";
+  number.textContent = `יחידה ${unit.order}`;
+
+  const status = document.createElement("span");
+  status.className = "topic-status";
+  status.textContent = statusLabels[unit.status];
+  cardHeader.append(number, status);
+
+  const title = document.createElement("h3");
+  title.textContent = unit.title;
+
+  const description = document.createElement("p");
+  description.className = "topic-description";
+  description.textContent = unit.description;
+
+  const action = document.createElement("button");
+  action.type = "button";
+  action.className = `topic-action ${unit.status === "locked" ? "locked-action" : ""}`;
+  action.disabled = true;
+  action.textContent = actionLabels[unit.status];
+
+  card.append(cardHeader, title, description, action);
+  return card;
+}
+
+function createCheckpoint(checkpoint) {
+  const wrapper = document.createElement("aside");
+  wrapper.className = `checkpoint ${checkpoint.optional ? "is-optional" : "is-required"}`;
+
+  const marker = document.createElement("span");
+  marker.className = "checkpoint-marker";
+  marker.setAttribute("aria-hidden", "true");
+  marker.textContent = "↓";
+
+  const text = document.createElement("div");
+  const title = document.createElement("strong");
+  title.textContent = checkpoint.label;
+  const detail = document.createElement("span");
+  detail.textContent = checkpoint.optional ? "מידע בלבד · אופציונלי" : "מידע בלבד · נדרש במסלול";
+  text.append(title, detail);
+
+  wrapper.append(marker, text);
+  return wrapper;
+}
+
+function createStatusMessage(message, state) {
+  const wrapper = document.createElement("div");
+  wrapper.className = `topics-state topics-state-${state}`;
+  wrapper.setAttribute("role", state === "error" ? "alert" : "status");
+
+  const text = document.createElement("p");
+  text.textContent = message;
+  wrapper.appendChild(text);
+
+  return wrapper;
+}
 
 // ---------------------------
 // Authentication State
@@ -435,7 +494,29 @@ onAuthStateChanged(
         }
 
 
-        await loadTopics();
+        topicsContainer.replaceChildren(
+          createStatusMessage("טוען את ההתקדמות שלך...", "loading")
+        );
+        topicsContainer.setAttribute("aria-busy", "true");
+
+        if (userData.role === "instructor") {
+          try {
+            const progress = await getOrCreateProgress(user.uid);
+            renderDashboard(progress);
+          } catch (progressError) {
+            console.error("Error loading progress:", progressError);
+            topicsContainer.replaceChildren(
+              createStatusMessage(
+                "לא הצלחנו לטעון את ההתקדמות כרגע. כדאי לרענן את הדף ולנסות שוב.",
+                "error"
+              )
+            );
+            topicsContainer.setAttribute("aria-busy", "false");
+            continueButton.disabled = true;
+          }
+        } else {
+          renderDashboard(EMPTY_PROGRESS);
+        }
 
       }
 
