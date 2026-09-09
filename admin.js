@@ -1,15 +1,10 @@
-import { initializeApp } from
-  "https://www.gstatic.com/firebasejs/12.8.0/firebase-app.js";
-
 import {
-  getAuth,
   signOut,
   onAuthStateChanged
 } from
   "https://www.gstatic.com/firebasejs/12.8.0/firebase-auth.js";
 
 import {
-  getFirestore,
   doc,
   getDoc,
   collection,
@@ -21,31 +16,7 @@ import {
 } from
   "https://www.gstatic.com/firebasejs/12.8.0/firebase-firestore.js";
 
-
-// ---------------------------
-// Firebase Configuration
-// ---------------------------
-
-const firebaseConfig = {
-  apiKey: "AIzaSyCXPQR1s8Q2oz8YJClxFq7PDosx4RQYosE",
-  authDomain: "mindplay-onboarding.firebaseapp.com",
-  projectId: "mindplay-onboarding",
-  storageBucket: "mindplay-onboarding.firebasestorage.app",
-  messagingSenderId: "247923560281",
-  appId: "1:247923560281:web:aa4f198aef93f15011c648",
-  measurementId: "G-WK3N8F03D3"
-};
-
-
-// ---------------------------
-// Initialize Firebase
-// ---------------------------
-
-const app = initializeApp(firebaseConfig);
-
-const auth = getAuth(app);
-
-const db = getFirestore(app);
+import { auth, db } from "./firebase.js";
 
 
 // ---------------------------
@@ -391,6 +362,9 @@ onAuthStateChanged(
         ||
         userSnapshot.data().role
           !== "trainingManager"
+        ||
+        userSnapshot.data().active
+          === false
       ) {
 
         accessDeniedSection.classList.remove(
