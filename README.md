@@ -13,10 +13,9 @@
 - הצגת נושאים פעילים מ־`topics` לפי הסדר.
 - מסך ניהול מוגן ברמת הממשק, שמאפשר ליצור נושא ולסמן אם נדרש Zoom אחריו.
 
-עדיין אין מסך למידה של יחידה/step, שמירת התקדמות, נעילת יחידות, שאלות,
-סימולציות או Firestore Security Rules בריפו. לכן אין להתייחס לממשק הקיים כאל
-מערכת הרשאות מלאה: בדיקת role בצד הלקוח היא UX בלבד, והאכיפה חייבת להתבצע גם
-ב־Firestore Rules.
+עדיין אין מסך למידה של יחידה/step, שמירת התקדמות, נעילת יחידות, שאלות או
+סימולציות. כללי Firestore עבור המודל הקיים והמודל המתוכנן נמצאים בריפו, אך הם
+מגינים על סביבת Firebase רק לאחר פריסה מפורשת.
 
 ## מסמך המוצר
 
@@ -35,3 +34,21 @@ python3 -m http.server 8000
 
 לאחר מכן פותחים `http://localhost:8000` בדפדפן. כדי ש־Google Sign-In יעבוד,
 הדומיין המקומי צריך להיות מורשה ב־Firebase Authentication.
+
+## השלמת Phase 1 ב־Firebase
+
+יש לבצע את הפעולות הבאות פעם אחת מתוך תיקיית הפרויקט:
+
+1. מתקינים את Firebase CLI: `npm install -g firebase-tools`.
+2. מתחברים לחשבון שמנהל את הפרויקט: `firebase login`.
+3. פורסים את כללי האבטחה לפרויקט הנכון:
+   `firebase deploy --only firestore:rules --project mindplay-onboarding`.
+4. ב־Firebase Console פותחים **Authentication → Settings → Authorized
+   domains** ומוודאים שקיימים `localhost` ו־`mindplay-games.github.io`.
+5. יוצרים חשבון דרך מסך ההתחברות. לאחר מכן, רק מנהלת הפרויקט משנה ידנית את
+   `users/{uid}.role` מ־`instructor` ל־`trainingManager` עבור אחראיות הדרכה.
+6. מבצעים את רשימת הבדיקות הידניות שב־`docs/PHASE_1_VERIFICATION.md` לפני
+   שמתחילים את Phase 2.
+
+אין לשנות role מתוך קוד הדפדפן ואין לפרסם Rules ישירות ב־Console בלי לעדכן גם
+את `firestore.rules` בריפו.

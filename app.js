@@ -1,8 +1,4 @@
-import { initializeApp } from
-  "https://www.gstatic.com/firebasejs/12.8.0/firebase-app.js";
-
 import {
-  getAuth,
   GoogleAuthProvider,
   signInWithPopup,
   signOut,
@@ -11,7 +7,6 @@ import {
   "https://www.gstatic.com/firebasejs/12.8.0/firebase-auth.js";
 
 import {
-  getFirestore,
   doc,
   getDoc,
   setDoc,
@@ -24,37 +19,7 @@ import {
 } from
   "https://www.gstatic.com/firebasejs/12.8.0/firebase-firestore.js";
 
-
-// ---------------------------
-// Firebase Configuration
-// ---------------------------
-
-const firebaseConfig = {
-  apiKey: "AIzaSyCXPQR1s8Q2oz8YJClxFq7PDosx4RQYosE",
-
-  authDomain: "mindplay-onboarding.firebaseapp.com",
-
-  projectId: "mindplay-onboarding",
-
-  storageBucket: "mindplay-onboarding.firebasestorage.app",
-
-  messagingSenderId: "247923560281",
-
-  appId: "1:247923560281:web:aa4f198aef93f15011c648",
-
-  measurementId: "G-WK3N8F03D3"
-};
-
-
-// ---------------------------
-// Initialize Firebase
-// ---------------------------
-
-const app = initializeApp(firebaseConfig);
-
-const auth = getAuth(app);
-
-const db = getFirestore(app);
+import { auth, db } from "./firebase.js";
 
 const googleProvider = new GoogleAuthProvider();
 
@@ -102,6 +67,8 @@ const managerSection =
 const openAdminButton =
   document.getElementById("open-admin-btn");
 
+let signedOutMessage = "";
+
 
 // ---------------------------
 // Google Login
@@ -112,6 +79,8 @@ loginButton.addEventListener(
   async () => {
 
     try {
+
+      signedOutMessage = "";
 
       userMessage.textContent =
         "מתחבר...";
@@ -148,6 +117,8 @@ logoutButton.addEventListener(
   async () => {
 
     try {
+
+      signedOutMessage = "";
 
       await signOut(auth);
 
@@ -381,6 +352,17 @@ onAuthStateChanged(
             user
           );
 
+        if (userData.active === false) {
+
+          signedOutMessage =
+            "החשבון שלך אינו פעיל. אפשר לפנות לאחראית ההדרכה לקבלת עזרה.";
+
+          await signOut(auth);
+
+          return;
+
+        }
+
 
         loginSection.classList.add(
           "hidden"
@@ -490,7 +472,9 @@ onAuthStateChanged(
 
 
       userMessage.textContent =
-        "";
+        signedOutMessage;
+
+      signedOutMessage = "";
 
     }
 
