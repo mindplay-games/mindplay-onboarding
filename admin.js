@@ -9,8 +9,8 @@ import {
   getDoc,
   collection,
   getDocs,
-  addDoc,
   serverTimestamp,
+  writeBatch,
   query,
   orderBy
 } from
@@ -43,6 +43,9 @@ const deniedBackButton =
 
 const topicForm =
   document.getElementById("topic-form");
+
+const topicSubmitButton =
+  topicForm.querySelector('button[type="submit"]');
 
 const topicTitle =
   document.getElementById("topic-title");
@@ -190,34 +193,41 @@ async function loadTopics() {
           "admin-topic-item"
         );
 
-        item.innerHTML = `
-          <h3>
-            ${topic.order}. ${topic.title}
-          </h3>
+        const heading =
+          document.createElement("h3");
 
-          <p>
-            ${topic.description || ""}
-          </p>
+        heading.textContent =
+          `${topic.order}. ${topic.title}`;
 
-          <p>
-            סטטוס:
-            ${
-              topic.active
-                ? "פעיל"
-                : "לא פעיל"
-            }
-          </p>
+        const description =
+          document.createElement("p");
 
-          ${
-            topic.requiresZoomAfter
-              ? `
-                <p>
-                  Zoom לאחר הנושא: כן
-                </p>
-              `
-              : ""
-          }
-        `;
+        description.textContent =
+          topic.description || "";
+
+        const status =
+          document.createElement("p");
+
+        status.textContent =
+          `סטטוס: ${topic.active ? "פעיל" : "לא פעיל"}`;
+
+        item.append(
+          heading,
+          description,
+          status
+        );
+
+        if (topic.requiresZoomAfter) {
+
+          const zoomStatus =
+            document.createElement("p");
+
+          zoomStatus.textContent =
+            "Zoom לאחר הנושא: כן";
+
+          item.appendChild(zoomStatus);
+
+        }
 
         adminTopicsContainer.appendChild(
           item
@@ -253,10 +263,49 @@ topicForm.addEventListener(
 
     event.preventDefault();
 
+    topicSubmitButton.disabled =
+      true;
+
     formMessage.textContent =
       "שומר...";
 
     try {
+
+      const requestedOrder =
+        Number(topicOrder.value);
+
+      const topicsQuery =
+        query(
+          collection(db, "topics"),
+          orderBy("order")
+        );
+
+      const snapshot =
+        await getDocs(topicsQuery);
+
+      if (
+        !Number.isInteger(requestedOrder)
+        || requestedOrder < 1
+        || requestedOrder > snapshot.size + 1
+      ) {
+
+        formMessage.textContent =
+          `יש להזין מספר בין 1 ל־${snapshot.size + 1}.`;
+
+        return;
+
+      }
+
+      if (snapshot.size >= 499) {
+
+        throw new Error(
+          "Topic ordering exceeds the Firestore batch limit."
+        );
+
+      }
+
+      const newTopicRef =
+        doc(collection(db, "topics"));
 
       const newTopic = {
 
@@ -267,7 +316,7 @@ topicForm.addEventListener(
           topicDescription.value.trim(),
 
         order:
-          Number(topicOrder.value),
+          requestedOrder,
 
         active:
           topicActive.checked,
@@ -287,10 +336,49 @@ topicForm.addEventListener(
 
       }
 
-      await addDoc(
-        collection(db, "topics"),
-        newTopic
+      const orderedTopicRefs =
+        snapshot.docs.map(
+          (documentSnapshot) =>
+            documentSnapshot.ref
+        );
+
+      orderedTopicRefs.splice(
+        requestedOrder - 1,
+        0,
+        newTopicRef
       );
+
+      const batch =
+        writeBatch(db);
+
+      orderedTopicRefs.forEach(
+        (topicRef, index) => {
+
+          if (topicRef.path === newTopicRef.path) {
+
+            batch.set(
+              topicRef,
+              {
+                ...newTopic,
+                order: index + 1
+              }
+            );
+
+            return;
+
+          }
+
+          batch.update(
+            topicRef,
+            {
+              order: index + 1
+            }
+          );
+
+        }
+      );
+
+      await batch.commit();
 
       formMessage.textContent =
         "הנושא נוסף בהצלחה.";
@@ -317,6 +405,13 @@ topicForm.addEventListener(
 
       formMessage.textContent =
         "אירעה שגיאה בשמירת הנושא.";
+
+    }
+
+    finally {
+
+      topicSubmitButton.disabled =
+        false;
 
     }
 
