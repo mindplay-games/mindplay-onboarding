@@ -40,7 +40,7 @@
       <header class="dashboard-header">
 
         <div>
-          <h1>האונבורדינג שלי</h1>
+          <a class="brand" href="index.html" aria-label="MindPlay - דף הבית">MindPlay</a>
 
           <p id="welcome-message"></p>
         </div>
@@ -94,11 +94,53 @@
       </section>
 
 
-      <section class="topics-section">
+      <section class="dashboard-intro" aria-labelledby="dashboard-title">
+        <div>
+          <p class="eyebrow">מסלול ההכשרה שלך</p>
+          <h1 id="dashboard-title">ברוכה הבאה למסלול ההכשרה שלך ב־MindPlay</h1>
+          <p>כאן מתקדמים צעד אחר צעד, בקצב שלך, עד שמרגישים מוכנים להדרכה הראשונה.</p>
+        </div>
 
-        <h2>מסלול ההכשרה</h2>
+        <button id="continue-btn" class="primary-button" type="button" aria-describedby="continue-message" disabled>
+          המשך מאיפה שעצרתי
+        </button>
+      </section>
 
-        <div id="topics-container">
+      <section class="overall-progress" aria-labelledby="overall-progress-title">
+        <div class="progress-copy">
+          <div>
+            <p class="eyebrow">ההתקדמות הכוללת</p>
+            <h2 id="overall-progress-title">המסע שלך מתחיל כאן</h2>
+          </div>
+          <strong id="overall-progress-value">0%</strong>
+        </div>
+        <p id="progress-details" class="progress-details">0 מתוך 6 יחידות הושלמו</p>
+        <div
+          class="progress-track"
+          role="progressbar"
+          aria-label="התקדמות כוללת"
+          aria-valuemin="0"
+          aria-valuemax="100"
+          aria-valuenow="0"
+        >
+          <span id="overall-progress-bar"></span>
+        </div>
+        <p id="current-unit-label" class="current-unit-label">היחידה הראשונה תהיה זמינה מיד לאחר הטעינה.</p>
+      </section>
+
+      <p id="continue-message" class="continue-message" role="status" aria-live="polite"></p>
+
+      <section class="topics-section" aria-labelledby="training-path-title">
+
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">6 יחידות קצרות ומעשיות</p>
+            <h2 id="training-path-title">מסלול ההכשרה</h2>
+          </div>
+          <p>היחידות נפתחות לפי הסדר כדי לבנות ביטחון בהדרגה.</p>
+        </div>
+
+        <div id="topics-container" aria-live="polite" aria-busy="true">
 
           <p>
             טוען נושאים...

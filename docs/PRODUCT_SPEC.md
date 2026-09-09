@@ -90,6 +90,9 @@ checkpoint הוא step מפורש ולא שדה מיוחד על יחידה. ב־
 - אחוז השלמה כולל וכפתור "המשך מאיפה שעצרתי".
 - כרטיס לכל אחת משש היחידות: שם, תיאור, progress, status ו־CTA.
 - מצבים עקביים: `locked`, `available`, `inProgress`, `completed`.
+- כבר ב־Phase 2 נוצר ונקרא `progress/{uid}` בסיסי עם `startedUnits` ו־
+  `completedUnits`, כדי שה־dashboard ישחזר את ארבעת המצבים ואת יעד ההמשך.
+  Phase 4 מרחיב את אותו מסמך במעקב שמגיע ממסכי הלמידה ואינו יוצר מודל מקביל.
 
 ### מסך למידה
 
@@ -189,7 +192,7 @@ progress/{uid}
 1. Authentication + roles, כולל Security Rules.
 2. Instructor dashboard.
 3. Units + Steps והמיגרציה מ־topics.
-4. Progress tracking.
+4. Progress tracking מתוך מסכי הלמידה והרחבת מודל ה־progress הבסיסי של Phase 2.
 5. Training Manager dashboard.
 6. Content editor.
 7. Questions.
